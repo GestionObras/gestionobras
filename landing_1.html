@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GestiónObras — Software de gestión para construcción</title>
+<meta name="description" content="Controla las peonadas, anticipos, obras y facturas de tu empresa constructora desde el móvil. 14 días gratis."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fraunces:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;color:#1a1a2e;background:#fff;-webkit-font-smoothing:antialiased}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.06)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:#0f2444;text-decoration:none}
+.nav-logo span{font-size:26px}
+.nav-cta{background:#0f2444;color:#fff;padding:9px 20px;border-radius:50px;font-weight:700;font-size:14px;text-decoration:none;transition:background .15s}
+.nav-cta:hover{background:#1b3e6e}
+
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(160deg,#0f2444 0%,#1b3e6e 50%,#0f2444 100%);display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 24px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:6px 16px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:28px;letter-spacing:.3px}
+.hero-badge::before{content:'●';color:#10b981;font-size:10px}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(36px,6vw,72px);font-weight:900;color:#fff;line-height:1.08;margin-bottom:24px;max-width:800px}
+.hero h1 em{font-style:italic;color:#f59e0b}
+.hero p{font-size:clamp(16px,2.5vw,20px);color:rgba(255,255,255,.75);max-width:520px;line-height:1.65;margin:0 auto 40px;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:#f59e0b;color:#0f2444;padding:16px 32px;border-radius:50px;font-weight:800;font-size:16px;text-decoration:none;transition:all .15s;box-shadow:0 4px 20px rgba(245,158,11,.4)}
+.btn-primary:hover{background:#fbbf24;transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,158,11,.5)}
+.btn-secondary{background:rgba(255,255,255,.1);color:#fff;padding:16px 32px;border-radius:50px;font-weight:700;font-size:16px;text-decoration:none;border:1px solid rgba(255,255,255,.25);transition:all .15s}
+.btn-secondary:hover{background:rgba(255,255,255,.18)}
+.hero-note{margin-top:20px;font-size:13px;color:rgba(255,255,255,.5)}
+
+/* STATS */
+.stats{background:#f8fafc;padding:48px 24px;border-bottom:1px solid #e2e8f0}
+.stats-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:32px;text-align:center}
+.stat-num{font-family:'Fraunces',serif;font-size:42px;font-weight:900;color:#0f2444;line-height:1}
+.stat-label{font-size:13px;color:#64748b;margin-top:6px;font-weight:500}
+
+/* FEATURES */
+.features{padding:96px 24px;max-width:1100px;margin:0 auto}
+.section-label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f59e0b;margin-bottom:14px}
+.section-title{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,46px);font-weight:900;color:#0f2444;line-height:1.15;margin-bottom:16px}
+.section-sub{font-size:17px;color:#64748b;max-width:520px;line-height:1.65;margin-bottom:60px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.feature-card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:32px;transition:all .2s;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0f2444,#f59e0b)}
+.feature-card:hover{border-color:#0f2444;box-shadow:0 12px 40px rgba(15,36,68,.1);transform:translateY(-2px)}
+.feature-icon{font-size:36px;margin-bottom:16px;display:block}
+.feature-title{font-weight:800;font-size:18px;color:#0f2444;margin-bottom:10px}
+.feature-desc{font-size:14px;color:#64748b;line-height:1.65}
+
+/* HOW IT WORKS */
+.how{background:linear-gradient(135deg,#0f2444,#1b3e6e);padding:96px 24px;text-align:center}
+.how .section-label{color:#f59e0b}
+.how .section-title{color:#fff;margin-bottom:60px}
+.steps{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;position:relative}
+.steps::before{content:'';position:absolute;top:40px;left:15%;right:15%;height:1px;background:rgba(255,255,255,.15)}
+.step{padding:0 24px;text-align:center}
+.step-num{width:80px;height:80px;border-radius:50%;background:#f59e0b;color:#0f2444;font-family:'Fraunces',serif;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;position:relative;z-index:1}
+.step-title{font-weight:700;font-size:16px;color:#fff;margin-bottom:8px}
+.step-desc{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6}
+
+/* PRICING */
+.pricing{padding:96px 24px;text-align:center;background:#f8fafc}
+.pricing-card{max-width:480px;margin:0 auto;background:#fff;border-radius:28px;padding:48px 40px;box-shadow:0 20px 60px rgba(15,36,68,.12);border:2px solid #0f2444;position:relative}
+.pricing-badge{position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#0f2444;font-weight:800;font-size:13px;padding:6px 20px;border-radius:50px;white-space:nowrap}
+.pricing-name{font-size:14px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.pricing-price{font-family:'Fraunces',serif;font-size:72px;font-weight:900;color:#0f2444;line-height:1}
+.pricing-price sup{font-size:28px;vertical-align:top;margin-top:14px;display:inline-block}
+.pricing-price span{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;color:#94a3b8}
+.pricing-trial{font-size:14px;color:#10b981;font-weight:700;margin:12px 0 32px;padding:8px 16px;background:#f0fdf4;border-radius:50px;display:inline-block}
+.pricing-features{list-style:none;margin-bottom:36px;text-align:left}
+.pricing-features li{padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#475569;display:flex;align-items:center;gap:10px}
+.pricing-features li::before{content:'✓';color:#10b981;font-weight:800;font-size:16px;flex-shrink:0}
+.pricing-features li:last-child{border-bottom:none}
+.pricing-cta{display:block;background:#0f2444;color:#fff;padding:16px;border-radius:14px;font-weight:800;font-size:16px;text-decoration:none;transition:all .15s;margin-bottom:14px}
+.pricing-cta:hover{background:#1b3e6e}
+.pricing-guarantee{font-size:12px;color:#94a3b8}
+
+/* TESTIMONIAL */
+.testimonial{padding:96px 24px;max-width:800px;margin:0 auto;text-align:center}
+.quote{font-family:'Fraunces',serif;font-size:clamp(22px,3.5vw,36px);font-weight:700;font-style:italic;color:#0f2444;line-height:1.4;margin-bottom:28px}
+.quote::before{content:'"';font-size:80px;color:#f59e0b;line-height:0;vertical-align:-30px;margin-right:8px;font-family:'Fraunces',serif}
+.author{display:flex;align-items:center;justify-content:center;gap:14px}
+.author-avatar{width:52px;height:52px;border-radius:50%;background:#0f2444;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
+.author-name{font-weight:700;font-size:15px;color:#0f2444;text-align:left}
+.author-role{font-size:13px;color:#64748b;text-align:left}
+
+/* FAQ */
+.faq{padding:96px 24px;background:#f8fafc}
+.faq-inner{max-width:680px;margin:0 auto}
+.faq h2{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,42px);font-weight:900;color:#0f2444;margin-bottom:48px;text-align:center}
+.faq-item{background:#fff;border-radius:14px;padding:24px 28px;margin-bottom:12px;border:1px solid #e2e8f0;cursor:pointer}
+.faq-q{font-weight:700;font-size:15px;color:#0f2444;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-q::after{content:'+';font-size:22px;color:#94a3b8;flex-shrink:0;transition:transform .2s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{font-size:14px;color:#64748b;line-height:1.7;margin-top:14px;display:none}
+.faq-item.open .faq-a{display:block}
+
+/* FINAL CTA */
+.final-cta{background:linear-gradient(135deg,#0f2444,#1b3e6e);padding:96px 24px;text-align:center}
+.final-cta h2{font-family:'Fraunces',serif;font-size:clamp(32px,5vw,58px);font-weight:900;color:#fff;margin-bottom:16px;line-height:1.1}
+.final-cta h2 em{font-style:italic;color:#f59e0b}
+.final-cta p{font-size:18px;color:rgba(255,255,255,.7);margin-bottom:40px}
+
+/* FOOTER */
+footer{background:#0a1628;padding:32px 24px;text-align:center}
+footer p{font-size:13px;color:#475569}
+footer a{color:#64748b;text-decoration:none}
+
+/* MOBILE */
+@media(max-width:600px){
+  .steps::before{display:none}
+  .pricing-card{padding:32px 24px}
+  .hero-btns{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo"><span>🏗️</span> GestiónObras</a>
+  <a href="https://gestionobras.vercel.app" class="nav-cta">Empezar gratis</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-badge">Software para empresas de construcción</div>
+    <h1>Controla tu obra.<br/><em>Para de perder dinero.</em></h1>
+    <p style="margin:0 auto 40px;">Registra peonadas, anticipos y facturas desde el móvil. Sin papeles, sin Excel, sin olvidar nada a final de mes.</p>
+    <div class="hero-btns">
+      <a href="https://gestionobras.vercel.app" class="btn-primary">Prueba gratis 14 días →</a>
+      <a href="#funciones" class="btn-secondary">Ver qué incluye</a>
+    </div>
+    <p class="hero-note">Sin tarjeta de crédito · Cancela cuando quieras · 24,99€/mes</p>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-num">5 min</div>
+      <div class="stat-label">Para empezar a usarla</div>
+    </div>
+    <div>
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Desde el móvil</div>
+    </div>
+    <div>
+      <div class="stat-num">0€</div>
+      <div class="stat-label">Los primeros 14 días</div>
+    </div>
+    <div>
+      <div class="stat-num">24,99€</div>
+      <div class="stat-label">Al mes, sin permanencia</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="funciones">
+  <div class="section-label">Funciones</div>
+  <h2 class="section-title">Todo lo que necesita<br/>tu empresa</h2>
+  <p class="section-sub">Diseñado específicamente para empresas de construcción en España. Sin complicaciones.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">📅</span>
+      <div class="feature-title">Control de peonadas</div>
+      <div class="feature-desc">Marca los días trabajados de cada operario con un toque. El sueldo se calcula solo según su categoría profesional.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💵</span>
+      <div class="feature-title">Anticipos semanales</div>
+      <div class="feature-desc">Registra los anticipos que vas dando durante la semana. A final de mes sabes exactamente lo que queda por pagar a cada uno.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🏗️</span>
+      <div class="feature-title">Gestión por obras</div>
+      <div class="feature-desc">Asigna trabajadores a cada obra. Ve el coste total de personal por obra cada mes de un vistazo.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📄</span>
+      <div class="feature-title">Facturas profesionales</div>
+      <div class="feature-desc">Crea facturas con tu logo y datos en segundos. Guarda clientes, controla cobros y exporta a PDF para enviar.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔧</span>
+      <div class="feature-title">Categorías personalizadas</div>
+      <div class="feature-desc">Define tus propios puestos — Oficial de 1ª, Peón, Capataz — con el precio de peonada que uses en tu empresa.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💰</span>
+      <div class="feature-title">Resumen de nómina</div>
+      <div class="feature-desc">A final de mes tienes un resumen completo: bruto, anticipos pagados y lo que queda por pagar a cada trabajador.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-label">Cómo funciona</div>
+  <h2 class="section-title" style="color:#fff">En marcha en 5 minutos</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Crea tu cuenta</div>
+      <div class="step-desc">Regístrate con tu email. Gratis los primeros 14 días, sin tarjeta.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Añade tu equipo</div>
+      <div class="step-desc">Da de alta a tus trabajadores, asígnales puesto y obra.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Marca cada día</div>
+      <div class="step-desc">Un toque por día trabajado. El sueldo y los anticipos se calculan solos.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Cierra el mes</div>
+      <div class="step-desc">Resumen completo de nómina y facturas listo para pagar.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="precio">
+  <div class="section-label">Precio</div>
+  <h2 class="section-title" style="margin-bottom:48px">Simple y sin sorpresas</h2>
+  <div class="pricing-card">
+    <div class="pricing-badge">✓ Plan completo — todo incluido</div>
+    <div class="pricing-name">Por empresa al mes</div>
+    <div class="pricing-price"><sup>€</sup>24<span>,99/mes</span></div>
+    <div class="pricing-trial">14 días de prueba gratuita</div>
+    <ul class="pricing-features">
+      <li>Trabajadores ilimitados</li>
+      <li>Obras ilimitadas</li>
+      <li>Control de peonadas y anticipos</li>
+      <li>Gestión de facturas y clientes</li>
+      <li>Resumen mensual de nómina</li>
+      <li>Acceso desde móvil y ordenador</li>
+      <li>Datos guardados en la nube</li>
+      <li>Sin permanencia — cancela cuando quieras</li>
+    </ul>
+    <a href="https://gestionobras.vercel.app" class="pricing-cta">Empezar 14 días gratis →</a>
+    <p class="pricing-guarantee">Sin tarjeta de crédito para la prueba gratuita</p>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial">
+  <p class="quote">Antes llevaba las peonadas en un cuaderno y siempre me liaba con los anticipos. Ahora lo tengo todo en el móvil y a final de mes sé exactamente lo que le debo a cada uno.</p>
+  <div class="author">
+    <div class="author-avatar">JM</div>
+    <div>
+      <div class="author-name">Manuel R.</div>
+      <div class="author-role">Jefe de obra · Empresa de construcción, Sevilla</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-inner">
+    <h2>Preguntas frecuentes</h2>
+    <div class="faq-item">
+      <div class="faq-q">¿Necesito instalar algo?</div>
+      <div class="faq-a">No. GestiónObras funciona directamente en el navegador de tu móvil u ordenador. Solo necesitas internet. Sin descargas, sin instalaciones.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Se pierden los datos si cierro la app?</div>
+      <div class="faq-a">No. Todos los datos se guardan automáticamente en la nube. Puedes cerrar y volver a abrir cuando quieras desde cualquier dispositivo.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Puedo usar la misma cuenta en varios dispositivos?</div>
+      <div class="faq-a">Sí. Tu cuenta funciona en cualquier móvil, tablet u ordenador. Entra con tu email y contraseña desde donde quieras.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Qué pasa cuando termina la prueba gratuita?</div>
+      <div class="faq-a">Después de los 14 días necesitas suscribirte por 24,99€/mes para seguir usando la app. Si no te convence, cancelas y listo. Sin compromiso.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Puedo personalizar los puestos y precios de peonada?</div>
+      <div class="faq-a">Sí. Desde la pestaña Puestos puedes crear los tuyos propios con el nombre y precio que uses en tu empresa.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Las facturas cumplen con los requisitos legales?</div>
+      <div class="faq-a">Las facturas incluyen todos los campos obligatorios: número, fecha, datos del emisor y receptor, base imponible e IVA. Puedes exportarlas a PDF para enviar o imprimir.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2>Empieza hoy.<br/><em>Gratis 14 días.</em></h2>
+  <p>Sin tarjeta. Sin permanencia. Sin complicaciones.</p>
+  <a href="https://gestionobras.vercel.app" class="btn-primary" style="font-size:18px;padding:18px 40px">Crear mi cuenta gratis →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 GestiónObras · <a href="https://gestionobras.vercel.app">gestionobras.vercel.app</a> · Hecho en España 🇪🇸</p>
+</footer>
+
+<script>
+// FAQ toggle
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>
