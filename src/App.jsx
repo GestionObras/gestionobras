@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 
 const SUPABASE_URL = "https://cvmsblijgvlngvgrdohd.supabase.co";
 const SUPABASE_KEY = "sb_publishable_ut3pcuiUtqwtAnXfTL-ZGQ_7uzg0SOe";
-const STRIPE_PK    = "pk_test_51ThY3y1XAAgNNFs7BGZVkBu89uU353BVZknS3MVccq2yfx5jf8ZJHm19mL5zSxpMRW0HaO8FfBXtLaJbmXd0RKnK00TPBj0TVw";
-const STRIPE_PRICE = "price_1ThYAl1XAAgNNFs7JhOxseGP";
+const STRIPE_PK    = "pk_live_51ThY3i0X1xqp06zjJEJWkvtRVTMJ9sKUkf7LvLsesmenbNCHJeOcW0Sp5DqmwdLj2vk5ML4s3VtQG7PHTr2K17H300FdLaSQo3";
+const STRIPE_PRICE = "price_1TmFFa0X1xqp06zjHCVpX2bn";
 const APP_NAME     = "GestiónObras";
 const PRECIO_MES   = 24.99;
 
