@@ -98,24 +98,12 @@ function getTrialStatus(empresa) {
 }
 
 // ── Stripe checkout ────────────────────────────────────────────────────────
+const STRIPE_LINK = "https://buy.stripe.com/3cI00beJrf93ed4ea3c3m00";
+
 async function redirectToCheckout(empresaId, email) {
-  // Load Stripe.js
-  if (!window.Stripe) {
-    await new Promise((resolve) => {
-      const s = document.createElement("script");
-      s.src = "https://js.stripe.com/v3/";
-      s.onload = resolve;
-      document.head.appendChild(s);
-    });
-  }
-  const stripe = window.Stripe(STRIPE_PK);
-  await stripe.redirectToCheckout({
-    lineItems: [{ price: STRIPE_PRICE, quantity: 1 }],
-    mode: "subscription",
-    successUrl: `${window.location.origin}/?pago=ok&empresa=${empresaId}`,
-    cancelUrl: `${window.location.origin}/?pago=cancelado`,
-    customerEmail: email,
-  });
+  // Open Stripe Payment Link with empresa info as metadata
+  const url = `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${empresaId}`;
+  window.location.href = url;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
