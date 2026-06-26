@@ -141,11 +141,19 @@ export default function App() {
   const [authView, setAuthView] = useState("login");
   const [loading,  setLoading]  = useState(false);
   const [initDone, setInitDone] = useState(false);
-  const [recoveryToken, setRecoveryToken] = useState(null);
+  const [recoveryToken, setRecoveryToken] = useState(() => {
+    const saved = LS.get("go_recovery");
+    if (saved) { LS.del("go_recovery"); return saved; }
+    return null;
+  });
 
-  // Check URL params for payment success
+  // Check URL params for payment and recovery
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    const fullUrl = window.location.href;
+
+    // Payment success
     if (params.get("pago") === "ok") {
       const empresaId = params.get("empresa");
       if (empresaId) {
@@ -156,32 +164,69 @@ export default function App() {
         });
       }
       window.history.replaceState({}, "", "/");
+      return;
     }
-    // Check for password recovery token in URL hash or query params
-    const hash = window.location.hash;
-    if (hash && hash.includes("access_token") && hash.includes("type=recovery")) {
+
+    // Password recovery - check ALL possible formats
+    // Format 1: Hash-based (older Supabase) - #access_token=xxx&type=recovery
+    if (hash && hash.includes("access_token")) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const token = hashParams.get("access_token");
+      const type = hashParams.get("type");
+      if (token && type === "recovery") {
+        LS.set("go_recovery", token); setRecoveryToken(token);
+        window.history.replaceState({}, "", "/");
+        return;
+      }
+    }
+
+    // Format 2: Query params with access_token
+    if (params.get("access_token") && params.get("type") === "recovery") {
+      LS.set("go_recovery", params.get("access_token")); setRecoveryToken(params.get("access_token"));
+      window.history.replaceState({}, "", "/");
+      return;
+    }
+
+    // Format 3: Code-based (newer Supabase PKCE)
+    if (params.get("code") && params.get("type") === "recovery") {
+      sb.verifyRecoveryToken(params.get("code")).then(function(accessToken) {
+        if (accessToken) { LS.set("go_recovery", accessToken); setRecoveryToken(accessToken); }
+      });
+      window.history.replaceState({}, "", "/");
+      return;
+    }
+
+    // Format 4: token_hash based
+    if (params.get("token_hash") && params.get("type") === "recovery") {
+      sb.verifyRecoveryToken(params.get("token_hash")).then(function(accessToken) {
+        if (accessToken) { LS.set("go_recovery", accessToken); setRecoveryToken(accessToken); }
+      });
+      window.history.replaceState({}, "", "/");
+      return;
+    }
+
+    // Format 5: Hash contains error_code or other params after Supabase redirect
+    if (hash && hash.includes("type=recovery")) {
       const hashParams = new URLSearchParams(hash.substring(1));
       const token = hashParams.get("access_token");
       if (token) {
-        setRecoveryToken(token);
+        LS.set("go_recovery", token); setRecoveryToken(token);
         window.history.replaceState({}, "", "/");
+        return;
       }
     }
-    // Also check for code-based recovery (newer Supabase)
-    if (params.get("type") === "recovery" && params.get("code")) {
-      const code = params.get("code");
-      sb.verifyRecoveryToken(code).then(accessToken => {
-        if (accessToken) setRecoveryToken(accessToken);
-      });
-      window.history.replaceState({}, "", "/");
-    }
-    // Also check for token_hash recovery
-    if (params.get("type") === "recovery" && params.get("token_hash")) {
-      const tokenHash = params.get("token_hash");
-      sb.verifyRecoveryToken(tokenHash).then(accessToken => {
-        if (accessToken) setRecoveryToken(accessToken);
-      });
-      window.history.replaceState({}, "", "/");
+
+    // Format 6: Supabase might put everything after # including access_token
+    if (hash && hash.length > 1) {
+      try {
+        const cleanHash = hash.startsWith("#") ? hash.substring(1) : hash;
+        const hashParams = new URLSearchParams(cleanHash);
+        if (hashParams.get("access_token") && (hashParams.get("type") === "recovery" || fullUrl.includes("recovery"))) {
+          LS.set("go_recovery", hashParams.get("access_token")); setRecoveryToken(hashParams.get("access_token"));
+          window.history.replaceState({}, "", "/");
+          return;
+        }
+      } catch(e) {}
     }
   }, []);
 
@@ -266,7 +311,7 @@ export default function App() {
   if (!initDone) return <Splash />;
 
   if (recoveryToken) {
-    return <NewPasswordScreen token={recoveryToken} onDone={() => setRecoveryToken(null)} />;
+    return <NewPasswordScreen token={recoveryToken} onDone={() => { LS.del("go_recovery"); setRecoveryToken(null); }} />;
   }
 
   if (!session || !empresa) {
