@@ -79,6 +79,15 @@ const sb = {
     });
     if (!r.ok) { const d = await r.json(); throw new Error(d.error_description || "Error al enviar el email"); }
     return true;
+  },
+  async updatePassword(accessToken, newPassword) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${accessToken}` },
+      body: JSON.stringify({ password: newPassword })
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error_description || "Error al cambiar la contraseña"); }
+    return true;
   }
 };
 
@@ -121,6 +130,7 @@ export default function App() {
   const [authView, setAuthView] = useState("login");
   const [loading,  setLoading]  = useState(false);
   const [initDone, setInitDone] = useState(false);
+  const [recoveryToken, setRecoveryToken] = useState(null);
 
   // Check URL params for payment success
   useEffect(() => {
@@ -135,6 +145,16 @@ export default function App() {
         });
       }
       window.history.replaceState({}, "", "/");
+    }
+    // Check for password recovery token in URL hash
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token") && hash.includes("type=recovery")) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const token = hashParams.get("access_token");
+      if (token) {
+        setRecoveryToken(token);
+        window.history.replaceState({}, "", "/");
+      }
     }
   }, []);
 
@@ -217,6 +237,10 @@ export default function App() {
   };
 
   if (!initDone) return <Splash />;
+
+  if (recoveryToken) {
+    return <NewPasswordScreen token={recoveryToken} onDone={() => setRecoveryToken(null)} />;
+  }
 
   if (!session || !empresa) {
     return <AuthScreen view={authView} setView={setAuthView} onLogin={handleLogin} onRegister={handleRegister} loading={loading} />;
@@ -1362,6 +1386,61 @@ function ResumenTab({ totales, trabajadores, obras, facturas, calcFacturaTotals,
             <span style={{ fontWeight: 700, color: c, fontSize: 14 }}>{fmt2(v)}</span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function NewPasswordScreen({ token, onDone }) {
+  const [newPass, setNewPass] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setError("");
+    if (!newPass || newPass.length < 6) { setError("La contraseña debe tener al menos 6 caracteres"); return; }
+    if (newPass !== confirm) { setError("Las contraseñas no coinciden"); return; }
+    setSaving(true);
+    try {
+      await sb.updatePassword(token, newPass);
+      setSuccess(true);
+    } catch (e) { setError(e.message); }
+    finally { setSaving(false); }
+  };
+
+  const inp = { width: "100%", border: "1px solid #E2E8F0", borderRadius: 10, padding: "11px 14px", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 10, fontFamily: "inherit", color: "#1e293b" };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#0F2444,#1B3E6E)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontSize: 48, marginBottom: 8 }}>🔑</div>
+          <div style={{ color: "#fff", fontWeight: 800, fontSize: 24 }}>Nueva contraseña</div>
+          <div style={{ color: "rgba(255,255,255,.6)", fontSize: 14, marginTop: 4 }}>Escribe tu nueva contraseña</div>
+        </div>
+        <div style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 20px 60px rgba(0,0,0,.3)" }}>
+          {!success ? (
+            <>
+              <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="Nueva contraseña" style={inp} />
+              <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repetir contraseña" style={{ ...inp, marginBottom: 0 }} onKeyDown={e => e.key === "Enter" && handleSave()} />
+              {error && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 8, padding: "8px 10px", background: "#fff5f5", borderRadius: 7 }}>{error}</div>}
+              <button onClick={handleSave} disabled={saving} style={{ width: "100%", marginTop: 16, background: saving ? "#94a3b8" : "#0F2444", color: "#fff", border: "none", borderRadius: 10, padding: "13px", fontWeight: 700, fontSize: 15, cursor: saving ? "not-allowed" : "pointer" }}>
+                {saving ? "Guardando..." : "Guardar nueva contraseña"}
+              </button>
+            </>
+          ) : (
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+              <div style={{ fontWeight: 700, fontSize: 18, color: "#059669", marginBottom: 8 }}>Contraseña actualizada</div>
+              <div style={{ fontSize: 14, color: "#64748b", marginBottom: 20 }}>Ya puedes iniciar sesión con tu nueva contraseña.</div>
+              <button onClick={onDone} style={{ width: "100%", background: "#0F2444", color: "#fff", border: "none", borderRadius: 10, padding: "13px", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
+                Ir al login
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
