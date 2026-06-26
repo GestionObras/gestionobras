@@ -86,8 +86,19 @@ const sb = {
       headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${accessToken}` },
       body: JSON.stringify({ password: newPassword })
     });
-    if (!r.ok) { const d = await r.json(); throw new Error(d.error_description || "Error al cambiar la contraseña"); }
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error_description || d.msg || d.message || "Error al cambiar la contraseña");
     return true;
+  },
+  async verifyRecoveryToken(token) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY },
+      body: JSON.stringify({ type: "recovery", token: token })
+    });
+    const d = await r.json();
+    if (d.access_token) return d.access_token;
+    return null;
   }
 };
 
@@ -146,7 +157,7 @@ export default function App() {
       }
       window.history.replaceState({}, "", "/");
     }
-    // Check for password recovery token in URL hash
+    // Check for password recovery token in URL hash or query params
     const hash = window.location.hash;
     if (hash && hash.includes("access_token") && hash.includes("type=recovery")) {
       const hashParams = new URLSearchParams(hash.substring(1));
@@ -155,6 +166,22 @@ export default function App() {
         setRecoveryToken(token);
         window.history.replaceState({}, "", "/");
       }
+    }
+    // Also check for code-based recovery (newer Supabase)
+    if (params.get("type") === "recovery" && params.get("code")) {
+      const code = params.get("code");
+      sb.verifyRecoveryToken(code).then(accessToken => {
+        if (accessToken) setRecoveryToken(accessToken);
+      });
+      window.history.replaceState({}, "", "/");
+    }
+    // Also check for token_hash recovery
+    if (params.get("type") === "recovery" && params.get("token_hash")) {
+      const tokenHash = params.get("token_hash");
+      sb.verifyRecoveryToken(tokenHash).then(accessToken => {
+        if (accessToken) setRecoveryToken(accessToken);
+      });
+      window.history.replaceState({}, "", "/");
     }
   }, []);
 
@@ -1406,7 +1433,13 @@ function NewPasswordScreen({ token, onDone }) {
     try {
       await sb.updatePassword(token, newPass);
       setSuccess(true);
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      if (e.message.includes("expired") || e.message.includes("invalid")) {
+        setError("El enlace ha caducado. Vuelve al login y solicita uno nuevo.");
+      } else {
+        setError(e.message);
+      }
+    }
     finally { setSaving(false); }
   };
 
