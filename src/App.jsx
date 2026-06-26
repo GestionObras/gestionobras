@@ -71,6 +71,14 @@ const sb = {
     await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
       method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${token}` }
     });
+  },
+  async resetPassword(email) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+      method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY },
+      body: JSON.stringify({ email })
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error_description || "Error al enviar el email"); }
+    return true;
   }
 };
 
@@ -276,6 +284,17 @@ function AuthScreen({ view, setView, onLogin, onRegister, loading }) {
   const [nombre, setNombre]     = useState("");
   const [empresa, setEmpresa]   = useState("");
   const [error, setError]       = useState("");
+  const [resetMode, setResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const handleReset = async () => {
+    setError("");
+    if (!email) { setError("Introduce tu email"); return; }
+    try {
+      await sb.resetPassword(email);
+      setResetSent(true);
+    } catch (e) { setError(e.message); }
+  };
 
   const handleSubmit = async () => {
     setError("");
@@ -301,24 +320,44 @@ function AuthScreen({ view, setView, onLogin, onRegister, loading }) {
           <div style={{ color: "rgba(255,255,255,.6)", fontSize: 14, marginTop: 4 }}>Software de gestión para construcción</div>
         </div>
         <div style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 20px 60px rgba(0,0,0,.3)" }}>
-          <div style={{ display: "flex", marginBottom: 24, background: "#F1F5F9", borderRadius: 10, padding: 3 }}>
+          {!resetMode && <div style={{ display: "flex", marginBottom: 24, background: "#F1F5F9", borderRadius: 10, padding: 3 }}>
             {[["login", "Iniciar sesión"], ["register", "Crear cuenta"]].map(([v, l]) => (
-              <button key={v} onClick={() => { setView(v); setError(""); }} style={{ flex: 1, border: "none", borderRadius: 8, padding: "9px", cursor: "pointer", fontWeight: 600, fontSize: 13, background: view === v ? "#fff" : "transparent", color: view === v ? "#0F2444" : "#64748b", boxShadow: view === v ? "0 1px 4px rgba(0,0,0,.1)" : "none" }}>
+              <button key={v} onClick={() => { setView(v); setError(""); setResetMode(false); setResetSent(false); }} style={{ flex: 1, border: "none", borderRadius: 8, padding: "9px", cursor: "pointer", fontWeight: 600, fontSize: 13, background: view === v ? "#fff" : "transparent", color: view === v ? "#0F2444" : "#64748b", boxShadow: view === v ? "0 1px 4px rgba(0,0,0,.1)" : "none" }}>
                 {l}
               </button>
             ))}
-          </div>
-          {view === "register" && <>
+          </div>}
+          {view === "register" && !resetMode && <>
             <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Tu nombre" style={inp} />
             <input value={empresa} onChange={e => setEmpresa(e.target.value)} placeholder="Nombre de tu empresa" style={inp} />
           </>}
           <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" style={inp} />
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña" style={{ ...inp, marginBottom: 0 }} onKeyDown={e => e.key === "Enter" && handleSubmit()} />
+          {!resetMode && <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña" style={{ ...inp, marginBottom: 0 }} onKeyDown={e => e.key === "Enter" && handleSubmit()} />}
+          {view === "login" && !resetMode && (
+            <div style={{ textAlign: "right", marginTop: 6 }}>
+              <button onClick={() => { setResetMode(true); setError(""); setResetSent(false); }} style={{ background: "none", border: "none", color: "#3B82F6", fontSize: 13, cursor: "pointer", fontWeight: 600, padding: 0 }}>¿Olvidaste tu contraseña?</button>
+            </div>
+          )}
+          {resetMode && !resetSent && (
+            <div style={{ background: "#EFF6FF", borderRadius: 10, padding: 16, marginTop: 8 }}>
+              <div style={{ fontSize: 13, color: "#1D4ED8", fontWeight: 600, marginBottom: 8 }}>Recuperar contraseña</div>
+              <div style={{ fontSize: 12, color: "#64748b", marginBottom: 12 }}>Te enviaremos un email con un enlace para restablecer tu contraseña.</div>
+              <button onClick={handleReset} style={{ width: "100%", background: "#3B82F6", color: "#fff", border: "none", borderRadius: 8, padding: "11px", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 8 }}>Enviar email de recuperación</button>
+              <button onClick={() => { setResetMode(false); setError(""); }} style={{ width: "100%", background: "none", border: "1px solid #ddd", borderRadius: 8, padding: "9px", fontSize: 13, cursor: "pointer", color: "#64748b" }}>Volver al login</button>
+            </div>
+          )}
+          {resetSent && (
+            <div style={{ background: "#F0FDF4", borderRadius: 10, padding: 16, marginTop: 8 }}>
+              <div style={{ fontSize: 14, color: "#059669", fontWeight: 700, marginBottom: 6 }}>✅ Email enviado</div>
+              <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>Revisa tu bandeja de entrada en <strong>{email}</strong> y pulsa el enlace para restablecer tu contraseña. Si no lo ves, mira en la carpeta de spam.</div>
+              <button onClick={() => { setResetMode(false); setResetSent(false); setError(""); }} style={{ width: "100%", marginTop: 12, background: "#0F2444", color: "#fff", border: "none", borderRadius: 8, padding: "11px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Volver al login</button>
+            </div>
+          )}
           {error && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 8, padding: "8px 10px", background: "#fff5f5", borderRadius: 7 }}>{error}</div>}
-          <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", marginTop: 16, background: loading ? "#94a3b8" : "#0F2444", color: "#fff", border: "none", borderRadius: 10, padding: "13px", fontWeight: 700, fontSize: 15, cursor: loading ? "not-allowed" : "pointer" }}>
+          {!resetMode && <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", marginTop: 16, background: loading ? "#94a3b8" : "#0F2444", color: "#fff", border: "none", borderRadius: 10, padding: "13px", fontWeight: 700, fontSize: 15, cursor: loading ? "not-allowed" : "pointer" }}>
             {loading ? "Cargando..." : view === "login" ? "Entrar" : "Crear cuenta gratis"}
-          </button>
-          {view === "register" && (
+          </button>}
+          {view === "register" && !resetMode && (
             <div style={{ marginTop: 14, fontSize: 11, color: "#94a3b8", textAlign: "center", lineHeight: 1.5 }}>
               14 días de prueba gratuita · Luego {PRECIO_MES}€/mes<br />Sin permanencia · Cancela cuando quieras
             </div>
